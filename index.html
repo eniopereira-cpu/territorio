@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090909">
+<title>Meu Controle — Visual corrigido</title>
+<style>
+:root{
+  --bg:#090909; --surface:#151515; --surface2:#202020; --line:#2b2b2b;
+  --text:#f3f3f3; --muted:#a6a6a6; --green:#79d7b0; --red:#ef777c;
+  --yellow:#ffd47a; --blue:#83b2ff; --purple:#a8a0ef;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Roboto,Arial,sans-serif}
+body{min-height:100vh}
+button,input,select{font:inherit}
+button{border:0;color:inherit;background:none}
+.app{max-width:720px;margin:auto;min-height:100vh;padding-bottom:88px}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(9,9,9,.96);backdrop-filter:blur(12px);padding:14px 16px 10px;border-bottom:1px solid #111}
+.toprow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.iconbtn{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:24px}
+.iconbtn:hover{background:#1b1b1b}
+.title{font-size:21px;font-weight:700;letter-spacing:.1px}
+.subtitle{font-size:13px;color:var(--muted);margin-top:2px}
+.month{display:flex;align-items:center;justify-content:center;gap:30px;padding:14px 0 5px;font-size:19px;font-weight:600}
+.month button{font-size:28px;color:#aaa}
+.month strong{text-decoration:underline;text-underline-offset:6px}
+.tabs{display:flex;gap:7px;overflow:auto;padding:8px 16px 12px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{white-space:nowrap;padding:10px 14px;border-radius:999px;background:#171717;color:#bdbdbd;border:1px solid #252525;font-size:14px}
+.tab.active{background:#e9e9e9;color:#111;border-color:#e9e9e9;font-weight:700}
+main{padding:8px 16px}
+.search{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid #202020;border-radius:28px;padding:13px 17px;margin-bottom:16px;color:#aaa}
+.search input{width:100%;background:transparent;border:0;outline:0;color:#eee}
+.section{margin:0 0 16px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:4px 2px 10px}
+.section-head h2{font-size:22px;margin:0}
+.card{background:var(--surface);border:1px solid #1f1f1f;border-radius:24px;padding:18px;margin-bottom:14px}
+.balance{text-align:center;padding:20px}
+.balance .label{color:var(--muted);font-size:14px}
+.balance .value{font-size:36px;font-weight:800;margin:6px 0}
+.balance .small{font-size:13px;color:var(--muted)}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.metric{background:var(--surface);border:1px solid #222;border-radius:20px;padding:15px}
+.metric .name{color:#ddd;font-size:14px}
+.metric .value{font-size:19px;font-weight:750;margin-top:8px}
+.green{color:var(--green)} .red{color:var(--red)} .yellow{color:var(--yellow)} .blue{color:var(--blue)}
+.overview-row{display:flex;align-items:center;gap:13px;padding:13px 0;border-bottom:1px solid #292929}
+.overview-row:last-child{border-bottom:0}
+.circle{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#111;font-weight:800;flex:0 0 42px}
+.circle.greenbg{background:var(--green)} .circle.redbg{background:var(--red)}
+.circle.yellowbg{background:var(--yellow)} .circle.bluebg{background:var(--blue)}
+.row-main{min-width:0;flex:1}.row-main b{display:block;font-size:16px}.row-main span{display:block;color:var(--muted);font-size:13px;margin-top:3px}
+.row-value{text-align:right;font-weight:700;white-space:nowrap}
+.account{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #292929}
+.account:last-child{border-bottom:0}
+.bank{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#eee;color:#111;font-weight:800}
+.list-item{display:flex;gap:12px;padding:15px 0;border-bottom:1px solid #292929}
+.list-item:last-child{border-bottom:0}
+.check{width:42px;height:42px;border-radius:50%;background:#18362d;color:var(--green);display:grid;place-items:center;font-size:23px;flex:0 0 42px}
+.date{text-align:right;color:#aaa;font-size:13px;white-space:nowrap}
+.amount{font-weight:750;margin-top:3px}
+.pill{display:inline-block;padding:5px 9px;border-radius:999px;font-size:12px;margin:8px 5px 0 0;background:#ef777c;color:#171717}
+.pill.yellow{background:var(--yellow)} .pill.green{background:var(--green)} .pill.blue{background:var(--blue)}
+.empty{padding:30px 12px;text-align:center;color:var(--muted)}
+.fab{position:fixed;right:20px;bottom:82px;width:62px;height:62px;border-radius:50%;background:var(--blue);color:#111;font-size:34px;box-shadow:0 8px 30px #000}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(16,16,16,.97);border-top:1px solid #242424;display:flex;justify-content:center;z-index:30}
+.bottom-inner{max-width:720px;width:100%;display:grid;grid-template-columns:repeat(4,1fr)}
+.nav{padding:9px 4px 10px;text-align:center;color:#999;font-size:11px}
+.nav .ico{font-size:21px;display:block;margin-bottom:2px}.nav.active{color:#fff}
+.form-row{display:flex;align-items:center;gap:12px;padding:16px 0;border-bottom:1px solid #292929}
+.form-row label{flex:1;color:#eee}.form-row small{display:block;color:#888;margin-top:3px}
+.form-row input,.form-row select{background:transparent;color:#fff;border:0;outline:0;text-align:right;max-width:52%;padding:5px}
+.primary{background:var(--red);color:#161616;font-weight:800;border-radius:22px;padding:12px 20px}
+.chart{height:180px;display:flex;align-items:flex-end;gap:10px;padding:16px 4px 4px}
+.bar{flex:1;background:var(--blue);border-radius:8px 8px 3px 3px;min-height:12px}
+.bar:nth-child(2n){background:var(--green)}
+.notice{font-size:12px;color:#999;line-height:1.5}
+@media(min-width:650px){main{padding:12px 24px}.tabs{padding-left:24px;padding-right:24px}.topbar{padding-left:24px;padding-right:24px}}
+
+.lock-screen{
+  position:fixed;inset:0;z-index:1000;background:rgba(9,9,9,.985);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.lock-box{
+  width:min(420px,100%);background:#151515;border:1px solid #2b2b2b;
+  border-radius:28px;padding:28px 22px;box-shadow:0 20px 70px rgba(0,0,0,.55);
+  text-align:center;
+}
+.lock-icon{font-size:42px;margin-bottom:10px}
+.lock-box h1{font-size:24px;margin:0 0 8px}
+.lock-box p{color:#a6a6a6;font-size:14px;line-height:1.5;margin:0 0 20px}
+.pin-dots{display:flex;justify-content:center;gap:10px;margin:18px 0 20px}
+.pin-dot{width:12px;height:12px;border-radius:50%;border:1px solid #666;background:transparent}
+.pin-dot.on{background:#83b2ff;border-color:#83b2ff}
+.pin-error{min-height:20px;color:#ef777c;font-size:13px;margin-bottom:10px}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pin-key{
+  height:58px;border-radius:16px;background:#202020;border:1px solid #2b2b2b;
+  font-size:20px;font-weight:700;
+}
+.pin-key:active{transform:scale(.98);background:#2a2a2a}
+.pin-key.action{font-size:14px;color:#bdbdbd}
+.lock-link{margin-top:16px;color:#83b2ff;font-size:13px}
+.pin-settings{
+  margin-top:14px;padding-top:14px;border-top:1px solid #292929;
+}
+.pin-settings button{
+  background:#202020;border:1px solid #2b2b2b;border-radius:14px;padding:10px 14px;
+  font-size:13px;color:#ddd;
+}
+
+
+.entry-actions{display:flex;gap:6px;margin-top:8px}
+.entry-action{
+  border:1px solid #303030;background:#1d1d1d;color:#ddd;border-radius:9px;
+  padding:6px 9px;font-size:11px;font-weight:600
+}
+.entry-action.delete{color:#ef9a9f}
+
+
+.chart-compare{margin-top:18px}
+.chart-row{display:grid;grid-template-columns:72px 1fr auto;gap:9px;align-items:center;margin:12px 0;font-size:12px}
+.track{height:10px;background:#292929;border-radius:99px;overflow:hidden;margin-top:6px}
+.fill{height:100%;border-radius:99px}
+.green-fill{background:#58b47a}
+.red-fill{background:#d9686d}
+.expense-rank{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:13px 0;border-bottom:1px solid #292929}
+.rank-number{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#252525;color:#ddd;font-size:11px;font-weight:700}
+.largest-expense{margin-top:14px;padding:12px;border-radius:12px;background:#241b1b;color:#eee;font-size:13px}
+
+</style>
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="theme-color" content="#090909"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Meu Controle"><script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}</script></head>
+<body>
+
+<div id="lockScreen" class="lock-screen">
+  <div class="lock-box">
+    <div class="lock-icon">🔒</div>
+    <h1 id="lockTitle">Meu Controle</h1>
+    <p id="lockMessage">Digite sua senha de 6 dígitos para acessar seus dados.</p>
+    <div class="pin-dots" id="pinDots"></div>
+    <div class="pin-error" id="pinError"></div>
+    <div class="pin-pad" id="pinPad">
+      <button class="pin-key" onclick="pinPress('1')">1</button>
+      <button class="pin-key" onclick="pinPress('2')">2</button>
+      <button class="pin-key" onclick="pinPress('3')">3</button>
+      <button class="pin-key" onclick="pinPress('4')">4</button>
+      <button class="pin-key" onclick="pinPress('5')">5</button>
+      <button class="pin-key" onclick="pinPress('6')">6</button>
+      <button class="pin-key" onclick="pinPress('7')">7</button>
+      <button class="pin-key" onclick="pinPress('8')">8</button>
+      <button class="pin-key" onclick="pinPress('9')">9</button>
+      <button class="pin-key action" onclick="pinClear()">Limpar</button>
+      <button class="pin-key" onclick="pinPress('0')">0</button>
+      <button class="pin-key action" onclick="pinBack()">⌫</button>
+    </div>
+    <div class="lock-link">Proteção local do aplicativo</div>
+  </div>
+</div>
+
+<div class="app">
+<header class="topbar">
+  <div class="toprow">
+    <button class="iconbtn" onclick="toggleMenu()" title="Proteção por senha">☰</button>
+    <div>
+      <div class="title" id="pageTitle">Visão geral</div>
+      <div class="subtitle">Seus dados ficam somente neste dispositivo</div>
+    </div>
+    <button class="iconbtn" onclick="showToast('Mais opções')">⋮</button>
+  </div>
+  <div class="month"><button onclick="shiftMonth(-1)">‹</button><strong id="monthLabel">Setembro</strong><button onclick="shiftMonth(1)">›</button></div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-page="dashboard">Visão geral</button>
+  <button class="tab" data-page="despesas">Despesas</button>
+  <button class="tab" data-page="receitas">Receitas</button>
+  <button class="tab" data-page="extrato">Extrato</button>
+  <button class="tab" data-page="graficos">Gráficos</button>
+</nav>
+
+<main id="content"></main>
+<button class="fab" onclick="newEntry()">＋</button>
+
+<footer class="bottom">
+ <div class="bottom-inner">
+  <button class="nav active" data-page="dashboard"><span class="ico">⌂</span>Início</button>
+  <button class="nav" data-page="despesas"><span class="ico">−</span>Despesas</button>
+  <button class="nav" data-page="receitas"><span class="ico">＋</span>Receitas</button>
+ </div>
+</footer>
+</div>
+
+<script>
+const PIN_KEY = 'meu_controle_pin_hash_v1';
+let pinBuffer = '';
+let pinMode = 'unlock';
+let pinFirst = '';
+
+function pinHash(text){
+  let h = 2166136261;
+  for(let i=0;i<text.length;i++){ h ^= text.charCodeAt(i); h = Math.imul(h,16777619); }
+  return ('00000000'+(h>>>0).toString(16)).slice(-8);
+}
+function renderPinDots(){
+  const box=document.getElementById('pinDots');
+  box.innerHTML=Array.from({length:6},(_,i)=>`<span class="pin-dot ${i<pinBuffer.length?'on':''}"></span>`).join('');
+}
+function setPinScreen(mode){
+  pinMode=mode; pinBuffer=''; pinFirst='';
+  const title=document.getElementById('lockTitle'), msg=document.getElementById('lockMessage'), err=document.getElementById('pinError');
+  if(mode==='setup'){title.textContent='Criar senha';msg.textContent='Escolha uma senha numérica de 6 dígitos.';}
+  else if(mode==='confirm'){title.textContent='Confirme a senha';msg.textContent='Digite novamente a mesma senha.';}
+  else {title.textContent='Meu Controle';msg.textContent='Digite sua senha de 6 dígitos para acessar seus dados.';}
+  err.textContent=''; renderPinDots();
+}
+function pinPress(n){
+  if(pinBuffer.length>=6)return;
+  pinBuffer+=n; renderPinDots();
+  if(pinBuffer.length===6)setTimeout(pinSubmit,120);
+}
+function pinBack(){pinBuffer=pinBuffer.slice(0,-1);renderPinDots();}
+function pinClear(){pinBuffer='';renderPinDots();document.getElementById('pinError').textContent='';}
+function pinSubmit(){
+  const err=document.getElementById('pinError');
+  if(pinMode==='setup'){
+    if(pinBuffer.length!==6)return;
+    pinFirst=pinBuffer; pinMode='confirm'; pinBuffer='';
+    document.getElementById('lockTitle').textContent='Confirme a senha';
+    document.getElementById('lockMessage').textContent='Digite novamente a mesma senha.';
+    renderPinDots(); return;
+  }
+  if(pinMode==='confirm'){
+    if(pinBuffer!==pinFirst){err.textContent='As senhas não coincidem.';pinBuffer='';renderPinDots();setTimeout(()=>setPinScreen('setup'),700);return;}
+    localStorage.setItem(PIN_KEY,pinHash(pinBuffer));
+    unlockApp(); return;
+  }
+  if(localStorage.getItem(PIN_KEY)===pinHash(pinBuffer)) unlockApp();
+  else {err.textContent='Senha incorreta.';pinBuffer='';renderPinDots();}
+}
+function unlockApp(){document.getElementById('lockScreen').style.display='none';}
+function lockApp(){document.getElementById('lockScreen').style.display='flex';setPinScreen(localStorage.getItem(PIN_KEY)?'unlock':'setup');}
+function changePin(){
+  const old=prompt('Digite a senha atual de 6 dígitos:');
+  if(!/^\d{6}$/.test(old||'') || pinHash(old)!==localStorage.getItem(PIN_KEY)){showToast('Senha atual incorreta');return;}
+  document.getElementById('lockScreen').style.display='flex';setPinScreen('setup');
+}
+function disablePin(){
+  const old=prompt('Digite a senha atual de 6 dígitos para desativar:');
+  if(/^\d{6}$/.test(old||'') && pinHash(old)===localStorage.getItem(PIN_KEY)){localStorage.removeItem(PIN_KEY);showToast('Proteção desativada');}
+  else showToast('Senha atual incorreta');
+}
+window.addEventListener('DOMContentLoaded',lockApp);
+/* SEM TEMPORIZADOR AUTOMÁTICO: permanece desbloqueado até o usuário sair/fechar. */
+</script>
+<script>
+const state={page:'dashboard', month:new Date().getMonth(), year:new Date().getFullYear()};
+const months=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const data={
+ despesas:[
+  ['Consignado Itaú','01','R$ 0,01','Empréstimo'],['Cartão de crédito Nubank','03','R$ 390,00','Pagamentos'],
+  ['Luz','03','R$ 161,02','Serviços'],['Cartão Itaú Platinum 3/4','07','R$ 472,28','Pagamentos'],
+  ['Comgás','07','R$ 29,00','Taxas'],['IPTU 4/6','07','R$ 93,50','Taxas'],['Alan Sistema 1/3','13','R$ 233,00','Pagamentos']
+ ],
+ receitas:[['SALÁRIO','05','R$ 1.555,27','Salário'],['Reembolso','12','R$ 300,00','Outros']],
+ contas:[['Minha Carteira','R$ 1.742,08'],['Minha Conta Corrente','-R$ 113,18'],['Investimentos','R$ 0,00']]
+};
+function money(v){return v}
+function setPage(page){
+ state.page=page;
+ document.querySelectorAll('.tab,.nav').forEach(x=>x.classList.toggle('active',x.dataset.page===page));
+ document.getElementById('pageTitle').textContent={dashboard:'Visão geral',despesas:'Despesas',receitas:'Receitas',contas:'Contas',extrato:'Extrato',graficos:'Gráficos'}[page];
+ render();
+}
+document.querySelectorAll('[data-page]').forEach(x=>x.onclick=()=>setPage(x.dataset.page));
+function shiftMonth(d){state.month+=d;if(state.month<0){state.month=11;state.year--}if(state.month>11){state.month=0;state.year++}document.getElementById('monthLabel').textContent=months[state.month];}
+function render(){
+ const c=document.getElementById('content');
+ if(state.page==='dashboard') c.innerHTML=dashboard();
+ if(state.page==='despesas') c.innerHTML=listPage('Despesas','R$ 3.594,28',data.despesas,'red');
+ if(state.page==='receitas') c.innerHTML=listPage('Receitas','R$ 3.590,94',data.receitas,'green');
+ if(state.page==='contas') c.innerHTML=accounts();
+ if(state.page==='extrato') c.innerHTML=statement();
+ if(state.page==='graficos') c.innerHTML=charts();
+}
+function dashboard(){return `
+<div class="search">🔎 <input placeholder="Pesquisar em Meu Controle"></div>
+<section class="card balance"><div class="label">Saldo atual</div><div class="value">R$ 1.628,90</div><div class="small">Previsão do mês: R$ 1.625,56</div></section>
+<section class="section"><div class="section-head"><h2>Visão geral</h2><button>⋮</button></div>
+<div class="card">
+<div class="overview-row"><div class="circle greenbg">＋</div><div class="row-main"><b>Receitas</b><span>Entradas efetivadas</span></div><div class="row-value green">R$ 3.590,94</div></div>
+<div class="overview-row"><div class="circle redbg">−</div><div class="row-main"><b>Despesas</b><span>Saídas efetivadas</span></div><div class="row-value red">R$ 3.594,28</div></div>
+<div class="overview-row"><div class="circle yellowbg">↕</div><div class="row-main"><b>Movimentação</b><span>Transferências</span></div><div class="row-value">R$ 0,00</div></div>
+<div class="overview-row"><div class="circle bluebg">▣</div><div class="row-main"><b>Economia mensal</b><span>Receitas − despesas</span></div><div class="row-value red">−R$ 3,34</div></div>
+</div></section>
+<section class="section"><div class="section-head"><h2>Contas</h2><button>↗</button></div>
+<div class="card">${data.contas.map((a,i)=>`<div class="account"><div class="bank">${i===2?'◈':'$'}</div><div class="row-main"><b>${a[0]}</b><span>Saldo disponível</span></div><div class="row-value ${a[1][0]==='-'?'red':''}">${a[1]}</div><button>⋮</button></div>`).join('')}</div></section>
+<section class="section"><div class="section-head"><h2>Resumo de vencimentos</h2><button>⋮</button></div>
+<div class="metrics"><div class="metric"><div class="name green">Efetivados</div><div class="value">R$ 3.594,28</div></div><div class="metric"><div class="name yellow">Próximos</div><div class="value">R$ 0,00</div></div><div class="metric"><div class="name red">Vencidos</div><div class="value">R$ 0,00</div></div><div class="metric"><div class="name">Distantes</div><div class="value">R$ 0,00</div></div></div></section>
+<section class="section"><div class="section-head"><h2>Últimos lançamentos</h2><button onclick="setPage('extrato')">Ver todos</button></div><div class="card">${data.despesas.slice(0,3).map(x=>`<div class="overview-row"><div class="circle redbg">−</div><div class="row-main"><b>${x[0]}</b><span>Minha Carteira • ${x[1]}º</span></div><div class="row-value red">−${x[2].replace('R$ ','R$ ')}</div></div>`).join('')}</div></section>`}
+function listPage(title,total,items,type){return `<div class="section-head"><div><h2>${title}</h2><div class="subtitle">${total} no mês</div></div><button>⌕</button></div><div class="card">${items.map(x=>`<div class="list-item"><div class="check">✓</div><div class="row-main"><span>Minha Carteira</span><b>${x[0]}</b><span><span class="pill ${type==='green'?'green':''}">${x[3]} ›</span></span></div><div class="date">${x[1]} · ${['Sáb.','Seg.','Seg.','Sex.','Sex.','Sex.','Qui.'][items.indexOf(x)]||'Dia'}<div class="amount ${type}">${type==='red'?'−':''}${x[2]}</div></div></div>`).join('')}</div>`}
+function accounts(){return `<div class="section-head"><h2>Contas</h2><button onclick="newEntry()">＋ Nova</button></div><div class="card">${data.contas.map(a=>`<div class="account"><div class="bank">▣</div><div class="row-main"><b>${a[0]}</b><span>Conta financeira</span></div><div class="row-value ${a[1][0]==='-'?'red':'green'}">${a[1]}</div><button>⋮</button></div>`).join('')}</div><div class="notice">As contas são apresentadas separadamente e podem ser usadas nos lançamentos.</div>`}
+function statement(){return `<div class="section-head"><div><h2>Extrato</h2><div class="subtitle">Saldo final R$ 1.628,90</div></div><button>⌕</button></div><div class="card"><div class="subtitle" style="font-size:15px;margin-bottom:12px">01 · segunda-feira</div>${data.receitas.slice(0,1).map(x=>`<div class="list-item"><div class="circle greenbg">＋</div><div class="row-main"><b>${x[0]}</b><span>Minha Carteira</span></div><div class="row-value green">+${x[2]}</div></div>`).join('')}${data.despesas.slice(0,2).map(x=>`<div class="list-item"><div class="circle redbg">−</div><div class="row-main"><b>${x[0]}</b><span>Minha Carteira</span></div><div class="row-value red">−${x[2]}</div></div>`).join('')}<div class="overview-row"><div class="circle bluebg">=</div><div class="row-main"><b>Saldo</b></div><div class="row-value">R$ 1.628,90</div></div></div>`}
+function charts(){
+  const items = (typeof mcLoad==='function' ? mcMonthItems() : []).filter(x=>x.effective!==false);
+  const receitas = items.filter(x=>x.type==='receita').reduce((s,x)=>s+x.value,0);
+  const despesas = items.filter(x=>x.type==='despesa').reduce((s,x)=>s+x.value,0);
+  const cats = {};
+  items.filter(x=>x.type==='despesa').forEach(x=>{ cats[x.category]=(cats[x.category]||0)+x.value; });
+  const ranking = Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+  const max = ranking[0]?.[1] || 1;
+  return `<div class="section-head"><h2>Gráficos</h2></div>
+  <div class="card">
+    <b>Receitas x despesas</b>
+    <div class="metrics" style="margin-top:14px">
+      <div class="metric"><div class="name green">Receitas</div><div class="value">${mcMoney(receitas)}</div></div>
+      <div class="metric"><div class="name red">Despesas</div><div class="value">${mcMoney(despesas)}</div></div>
+    </div>
+    <div class="chart-compare">
+      <div class="chart-row"><span>Receitas</span><div class="track"><div class="fill green-fill" style="width:${Math.max(receitas,1)/(Math.max(receitas,despesas,1))*100}%"></div></div><b>${mcMoney(receitas)}</b></div>
+      <div class="chart-row"><span>Despesas</span><div class="track"><div class="fill red-fill" style="width:${Math.max(despesas,1)/(Math.max(receitas,despesas,1))*100}%"></div></div><b>${mcMoney(despesas)}</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <b>Despesas por categoria</b>
+    <div class="subtitle" style="margin-top:4px">Ordenadas da maior para a menor despesa no mês</div>
+    ${ranking.length ? ranking.map((r,i)=>`
+      <div class="expense-rank">
+        <div class="rank-number">${i+1}</div>
+        <div class="row-main"><b>${r[0]}</b><div class="track"><div class="fill red-fill" style="width:${(r[1]/max)*100}%"></div></div></div>
+        <div class="row-value red">${mcMoney(r[1])}</div>
+      </div>`).join('') : '<div class="empty">Ainda não há despesas efetivadas para classificar.</div>'}
+    ${ranking.length ? `<div class="largest-expense"><b>Maior categoria de despesa:</b> ${ranking[0][0]} — ${mcMoney(ranking[0][1])}</div>` : ''}
+  </div>`;
+}
+function newEntry(){document.getElementById('content').innerHTML=`<div class="section-head"><div><h2>Novo lançamento</h2><div class="subtitle">Cadastre uma receita ou despesa</div></div><button onclick="setPage(state.page)">✕</button></div><div class="card"><div class="form-row"><label>Descrição<small>Nome da despesa ou receita</small></label><input id="desc" placeholder="Ex.: Luz"></div><div class="form-row"><label>Valor</label><input id="val" inputmode="decimal" placeholder="R$ 0,00"></div><div class="form-row"><label>Tipo</label><select id="tipo"><option>Despesa</option><option>Receita</option></select></div><div class="form-row"><label>Recorrência<small>Gerar os próximos meses</small></label><select><option>Não recorrente</option><option>Mensal</option></select></div><div class="form-row"><label>Data de vencimento</label><input type="date"></div><div class="form-row"><label>Efetivada</label><input type="checkbox" checked></div><div class="form-row"><label>Categoria</label><select><option>Pagamentos</option><option>Carro</option><option>Empréstimo</option><option>Casa</option><option>Cartão de crédito</option><option>Impostos</option><option>Demais despesas</option></select></div><div style="padding-top:18px;text-align:right"><button class="primary" onclick="saveDemo()">Salvar</button></div></div>`;document.getElementById('pageTitle').textContent='Novo lançamento';}
+function saveDemo(){showToast('Lançamento preparado para salvar');setPage('dashboard')}
+function toggleMenu(){
+  const hasPin=!!localStorage.getItem(PIN_KEY);
+  const action=confirm(
+    hasPin
+      ? 'Proteção por senha está ATIVA.\n\nOK = alterar senha\nCancelar = manter'
+      : 'Proteção por senha está DESATIVADA.\n\nOK = criar senha\nCancelar = manter'
+  );
+  if(action){
+    if(hasPin) changePin(); else setPinScreen('setup');
+    document.getElementById('lockScreen').style.display='flex';
+  }
+}
+function showToast(t){let x=document.getElementById('toast');if(!x){x=document.createElement('div');x.id='toast';x.style.cssText='position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:#eee;color:#111;padding:11px 16px;border-radius:999px;z-index:99;font-size:13px';document.body.appendChild(x)}x.textContent=t;x.style.display='block';clearTimeout(window._toast);window._toast=setTimeout(()=>x.style.display='none',1600)}
+document.getElementById('monthLabel').textContent=months[state.month];
+render();
+</script>
+
+
+<script>
+/* ===== Meu Controle V1.2 — lógica financeira aprovada ===== */
+const MC_KEY='meu_controle_lancamentos_v12';
+const MC_OPEN_KEY='meu_controle_saldos_iniciais_v12';
+const MC_CARRY_KEY='meu_controle_transporte_v12';
+
+function mcLoad(){
+  try{return JSON.parse(localStorage.getItem(MC_KEY)||'[]')}catch(e){return []}
+}
+function mcSave(a){localStorage.setItem(MC_KEY,JSON.stringify(a))}
+function mcMonthKey(y,m){return `${y}-${String(m+1).padStart(2,'0')}`}
+function mcMoney(n){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n)||0)}
+function mcNum(v){return Number(String(v).replace(/\./g,'').replace(',','.').replace(/[^\d.-]/g,''))||0}
+function mcMonthItems(){
+  const k=mcMonthKey(state.year,state.month);
+  return mcLoad().filter(x=>x.month===k);
+}
+function mcInitialBalance(y=state.year,m=state.month){
+  const all=JSON.parse(localStorage.getItem(MC_OPEN_KEY)||'{}');
+  const k=mcMonthKey(y,m);
+  if(all[k]!=null) return Number(all[k])||0;
+  // If the previous month was explicitly transported, use its final balance.
+  const prev=new Date(y,m,0);
+  const pk=mcMonthKey(prev.getFullYear(),prev.getMonth());
+  const carries=JSON.parse(localStorage.getItem(MC_CARRY_KEY)||'{}');
+  if(carries[pk]===true){
+    const prevItems=mcLoad().filter(x=>x.month===pk);
+    return mcCalcFinal(prevItems, mcInitialBalance(prev.getFullYear(),prev.getMonth()));
+  }
+  return 0;
+}
+function mcCalcFinal(items,initial){
+  return initial + items.reduce((s,x)=>s+(x.type==='receita'?x.value:-x.value),0);
+}
+function mcDailyRows(y=state.year,m=state.month){
+  const items=mcLoad().filter(x=>x.month===mcMonthKey(y,m));
+  const initial=mcInitialBalance(y,m);
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  let saldo=initial, rows=[];
+  for(let d=1;d<=daysInMonth;d++){
+    const dayItems=items.filter(x=>Number(x.day)===d && x.effective!==false);
+    const receitas=dayItems.filter(x=>x.type==='receita').reduce((s,x)=>s+x.value,0);
+    const despesas=dayItems.filter(x=>x.type==='despesa').reduce((s,x)=>s+x.value,0);
+    saldo += receitas-despesas;
+    if(dayItems.length || d===1 || d===daysInMonth){
+      rows.push({day:d,initial:saldo-(receitas-despesas),receitas,despesas,partial:saldo});
+    }
+  }
+  return {rows,final:saldo,initial,items};
+}
+function mcGo(page){setPage(page)}
+function mcCardActions(item){
+  return `<div class="entry-actions">
+    <button class="entry-action" type="button" onclick="mcEdit('${item.id}')">✏️ Editar</button>
+    <button class="entry-action delete" type="button" onclick="mcDelete('${item.id}')">🗑️ Excluir</button>
+  </div>`;
+}
+function mcEdit(id){
+  const x=mcLoad().find(a=>a.id===id); if(!x)return;
+  newEntry(x);
+}
+function mcDelete(id){
+  const x=mcLoad().find(a=>a.id===id); if(!x)return;
+  if(confirm(`Excluir "${x.description}"?`)){
+    mcSave(mcLoad().filter(a=>a.id!==id)); render();
+    showToast('Lançamento excluído.');
+  }
+}
+function mcSaveEntry(existingId=null){
+  const desc=document.getElementById('mcDesc').value.trim();
+  const value=mcNum(document.getElementById('mcVal').value);
+  const type=document.getElementById('mcTipo').value;
+  const date=document.getElementById('mcDate').value;
+  const category=document.getElementById('mcCat').value;
+  const effective=document.getElementById('mcEffective').checked;
+  if(!desc || value<=0 || !date){showToast('Preencha descrição, valor e data.');return}
+  const dt=new Date(date+'T12:00:00');
+  const arr=mcLoad();
+  const obj={id:existingId||('m'+Date.now()),description:desc,value,type,month:mcMonthKey(dt.getFullYear(),dt.getMonth()),day:dt.getDate(),date,category,effective};
+  if(existingId){
+    const i=arr.findIndex(a=>a.id===existingId); if(i>=0)arr[i]=obj;
+  }else arr.push(obj);
+  mcSave(arr);
+  state.year=dt.getFullYear(); state.month=dt.getMonth();
+  document.getElementById('monthLabel').textContent=months[state.month];
+  setPage(type==='despesa'?'despesas':'receitas');
+  showToast(existingId?'Lançamento atualizado.':'Lançamento salvo.');
+}
+function newEntry(existing=null){
+  const today=new Date();
+  const date=existing?.date || `${state.year}-${String(state.month+1).padStart(2,'0')}-${String(existing?.day||today.getDate()).padStart(2,'0')}`;
+  document.getElementById('content').innerHTML=`
+  <div class="section-head"><div><h2>${existing?'Editar lançamento':'Novo lançamento'}</h2><div class="subtitle">${existing?'Corrija os dados':'Cadastre uma receita ou despesa'}</div></div><button onclick="setPage('${existing?existing.type==='despesa'?'despesas':'receitas':'dashboard'}')">✕</button></div>
+  <div class="card">
+    <div class="form-row"><label>Descrição<small>Nome da despesa ou receita</small></label><input id="mcDesc" value="${existing?existing.description.replace(/"/g,'&quot;'):''}" placeholder="Ex.: Luz"></div>
+    <div class="form-row"><label>Valor</label><input id="mcVal" inputmode="decimal" value="${existing?String(existing.value).replace('.',','):''}" placeholder="0,00"></div>
+    <div class="form-row"><label>Tipo</label><select id="mcTipo"><option value="despesa" ${existing?.type==='despesa'?'selected':''}>Despesa</option><option value="receita" ${existing?.type==='receita'?'selected':''}>Receita</option></select></div>
+    <div class="form-row"><label>Data</label><input id="mcDate" type="date" value="${date}"></div>
+    <div class="form-row"><label>Efetivada<small>Entra no saldo diário</small></label><input id="mcEffective" type="checkbox" ${existing?.effective!==false?'checked':''}></div>
+    <div class="form-row"><label>Categoria</label><select id="mcCat">
+      ${['Carro','Empréstimo','Casa','Cartão de crédito','Impostos','Demais despesas','Salário','Outras receitas'].map(c=>`<option ${existing?.category===c?'selected':''}>${c}</option>`).join('')}
+    </select></div>
+    <div style="padding-top:18px;text-align:right"><button class="primary" onclick="mcSaveEntry(${existing?`'${existing.id}'`:'null'})">Salvar</button></div>
+  </div>`;
+  document.getElementById('pageTitle').textContent=existing?'Editar lançamento':'Novo lançamento';
+}
+function listPageReal(type){
+  const isR=type==='receita', title=isR?'Receitas':'Despesas', color=isR?'green':'red';
+  const items=mcMonthItems().filter(x=>x.type===type).sort((a,b)=>a.day-b.day);
+  const total=items.reduce((s,x)=>s+x.value,0);
+  return `<div class="section-head"><div><h2>${title}</h2><div class="subtitle">${mcMoney(total)} no mês</div></div><button onclick="newEntry()">＋ Nova</button></div>
+  <div class="card">${items.length?items.map(x=>`<div class="list-item">
+    <div class="check">${isR?'＋':'−'}</div>
+    <div class="row-main"><span>${x.effective===false?'Pendente':'Efetivada'}</span><b>${x.description}</b><span><span class="pill ${isR?'green':''}">${x.category} ›</span></span>${mcCardActions(x)}</div>
+    <div class="date">${String(x.day).padStart(2,'0')}<div class="amount ${color}">${isR?'+':'−'}${mcMoney(x.value)}</div></div>
+  </div>`).join(''):'<div class="empty">Nenhum lançamento neste mês.</div>'}</div>`;
+}
+function dashboardReal(){
+  const d=mcDailyRows(), items=d.items;
+  const receitas=items.filter(x=>x.type==='receita'&&x.effective!==false).reduce((s,x)=>s+x.value,0);
+  const despesas=items.filter(x=>x.type==='despesa'&&x.effective!==false).reduce((s,x)=>s+x.value,0);
+  const mov=receitas+despesas, eco=receitas-despesas;
+  const prevMonth=new Date(state.year,state.month-1,1);
+  const nextMonth=new Date(state.year,state.month+1,1);
+  const nextLabel=months[nextMonth.getMonth()];
+  const k=mcMonthKey(state.year,state.month);
+  const carries=JSON.parse(localStorage.getItem(MC_CARRY_KEY)||'{}');
+  const final=d.final;
+  const latest=[...items].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  const daily=d.rows;
+  return `<div class="search">🔎 <input placeholder="Pesquisar em Meu Controle"></div>
+  <section class="card balance"><div class="label">Saldo atual</div><div class="value">${mcMoney(final)}</div><div class="small">Saldo calculado automaticamente pelas receitas e despesas efetivadas.</div></section>
+
+  <section class="section"><div class="section-head"><h2>Visão geral</h2></div>
+  <div class="card">
+    <button class="overview-row" style="width:100%;text-align:left" onclick="mcGo('receitas')"><div class="circle greenbg">＋</div><div class="row-main"><b>Receitas</b><span>Entradas efetivadas</span></div><div class="row-value green">${mcMoney(receitas)}</div></button>
+    <button class="overview-row" style="width:100%;text-align:left" onclick="mcGo('despesas')"><div class="circle redbg">−</div><div class="row-main"><b>Despesas</b><span>Saídas efetivadas</span></div><div class="row-value red">${mcMoney(despesas)}</div></button>
+    <button class="overview-row" style="width:100%;text-align:left" onclick="mcGo('extrato')"><div class="circle yellowbg">↕</div><div class="row-main"><b>Movimentação</b><span>Receitas + despesas</span></div><div class="row-value">${mcMoney(mov)}</div></button>
+    <div class="overview-row"><div class="circle bluebg">▣</div><div class="row-main"><b>Economia mensal</b><span>Receitas − despesas</span></div><div class="row-value ${eco<0?'red':'green'}">${mcMoney(eco)}</div></div>
+  </div></section>
+
+  <section class="section"><div class="section-head"><h2>Saldo diário</h2></div>
+  <div class="card">
+    <div class="overview-row"><div class="circle bluebg">1</div><div class="row-main"><b>Saldo inicial</b><span>Início de ${months[state.month]}</span></div><div class="row-value">${mcMoney(d.initial)}</div></div>
+    ${daily.map(r=>`<div class="overview-row"><div class="circle ${r.partial<0?'redbg':'greenbg'}">${r.day}</div><div class="row-main"><b>Dia ${r.day}</b><span>Receitas ${mcMoney(r.receitas)} · Despesas ${mcMoney(r.despesas)}</span></div><div class="row-value ${r.partial<0?'red':''}">${mcMoney(r.partial)}</div></div>`).join('')}
+    <div class="overview-row"><div class="circle bluebg">=</div><div class="row-main"><b>Saldo final</b><span>${months[state.month]}</span></div><div class="row-value ${final<0?'red':'green'}">${mcMoney(final)}</div></div>
+  </div></section>
+
+  <section class="section"><div class="section-head"><h2>Fechamento do mês</h2></div>
+  <div class="card"><div class="row-main"><b>Transportar ${mcMoney(final)} para ${nextLabel}?</b><span>O saldo final será usado como saldo inicial do próximo mês.</span></div>
+  <div style="display:flex;gap:10px;margin-top:14px">
+    <button class="primary" onclick="mcCarry(true)">SIM</button>
+    <button class="tab" onclick="mcCarry(false)">NÃO</button>
+  </div>
+  <div class="notice" style="margin-top:10px">${carries[k]===true?'Saldo configurado para ser transportado.':carries[k]===false?'Saldo não será transportado.':'Escolha uma opção ao fechar o mês.'}</div></div></section>
+
+  <section class="section"><div class="section-head"><h2>Contas</h2></div>
+  <div class="card">${data.contas.map((a,i)=>`<div class="account"><div class="bank">${i===2?'◈':'$'}</div><div class="row-main"><b>${a[0]}</b><span>Saldo disponível</span></div><div class="row-value ${a[1][0]==='-'?'red':''}">${a[1]}</div></div>`).join('')}</div></section>
+
+  <section class="section"><div class="section-head"><h2>Resumo de vencimentos</h2></div>
+  <div class="metrics"><div class="metric"><div class="name green">Efetivados</div><div class="value">${mcMoney(items.filter(x=>x.effective!==false).reduce((s,x)=>s+x.value,0))}</div></div><div class="metric"><div class="name yellow">Próximos</div><div class="value">${mcMoney(items.filter(x=>x.effective===false&&x.day>=new Date().getDate()).reduce((s,x)=>s+x.value,0))}</div></div><div class="metric"><div class="name red">Vencidos</div><div class="value">${mcMoney(items.filter(x=>x.effective===false&&x.day<new Date().getDate()).reduce((s,x)=>s+x.value,0))}</div></div><div class="metric"><div class="name">Distantes</div><div class="value">${mcMoney(0)}</div></div></div></section>
+
+  <section class="section"><div class="section-head"><h2>Últimos lançamentos</h2><button onclick="setPage('extrato')">Ver todos</button></div>
+  <div class="card">${latest.length?latest.map(x=>`<div class="overview-row"><div class="circle ${x.type==='receita'?'greenbg':'redbg'}">${x.type==='receita'?'＋':'−'}</div><div class="row-main"><b>${x.description}</b><span>${String(x.day).padStart(2,'0')} · ${x.category}</span></div><div class="row-value ${x.type==='receita'?'green':'red'}">${x.type==='receita'?'+':'−'}${mcMoney(x.value)}</div></div>`).join(''):'<div class="empty">Nenhum lançamento ainda.</div>'}</div></section>`;
+}
+function mcCarry(yes){
+  const c=JSON.parse(localStorage.getItem(MC_CARRY_KEY)||'{}');
+  c[mcMonthKey(state.year,state.month)]=!!yes; localStorage.setItem(MC_CARRY_KEY,JSON.stringify(c));
+  showToast(yes?'Saldo será transportado.':'Saldo não será transportado.');
+  render();
+}
+
+
+function mcExtratoReal(){
+  const items = mcMonthItems().sort((a,b)=>a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+  const saldo = mcDailyRows().final;
+  const receitas = items.filter(x=>x.type==='receita'&&x.effective!==false).reduce((s,x)=>s+x.value,0);
+  const despesas = items.filter(x=>x.type==='despesa'&&x.effective!==false).reduce((s,x)=>s+x.value,0);
+  return `<div class="section-head"><div><h2>Extrato</h2><div class="subtitle">Movimentação de ${months[state.month]}</div></div></div>
+  <div class="card">
+    <div class="overview-row"><div class="circle bluebg">=</div><div class="row-main"><b>Saldo do mês</b><span>Calculado automaticamente</span></div><div class="row-value ${saldo<0?'red':'green'}">${mcMoney(saldo)}</div></div>
+    <div class="overview-row"><div class="circle greenbg">＋</div><div class="row-main"><b>Total de receitas</b><span>Entradas efetivadas</span></div><div class="row-value green">${mcMoney(receitas)}</div></div>
+    <div class="overview-row"><div class="circle redbg">−</div><div class="row-main"><b>Total de despesas</b><span>Saídas efetivadas</span></div><div class="row-value red">${mcMoney(despesas)}</div></div>
+  </div>
+  <div class="card">
+    <div class="section-head"><h2>Lançamentos</h2><button onclick="newEntry()">＋ Novo</button></div>
+    ${items.length ? items.map(x=>`<div class="overview-row">
+      <div class="circle ${x.type==='receita'?'greenbg':'redbg'}">${x.type==='receita'?'＋':'−'}</div>
+      <div class="row-main"><b>${x.description}</b><span>${String(x.day).padStart(2,'0')} · ${x.category} · ${x.effective===false?'Pendente':'Efetivada'}</span></div>
+      <div class="row-value ${x.type==='receita'?'green':'red'}">${x.type==='receita'?'+':'−'}${mcMoney(x.value)}</div>
+    </div>`).join('') : '<div class="empty">Extrato zerado. Nenhum lançamento neste mês.</div>'}
+  </div>`;
+}
+
+/* Substitui apenas as áreas que agora têm lógica real. */
+const _baseRender=render;
+render=function(){
+  document.getElementById('monthLabel').textContent=months[state.month];
+  if(state.page==='dashboard') document.getElementById('content').innerHTML=dashboardReal();
+  else if(state.page==='despesas') document.getElementById('content').innerHTML=listPageReal('despesa');
+  else if(state.page==='receitas') document.getElementById('content').innerHTML=listPageReal('receita');
+  else if(state.page==='extrato') document.getElementById('content').innerHTML=mcExtratoReal();
+  else _baseRender();
+};
+</script>
+
+</body>
+</html>
